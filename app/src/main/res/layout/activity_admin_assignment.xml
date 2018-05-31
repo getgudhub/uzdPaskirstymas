@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/woodbg">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="Grupė: "
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="20sp" />
+
+                <EditText
+                    android:id="@+id/etGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:hint="grupė/sprintas/pagal ką skirstomas"
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Užduotis skirta: "
+                        android:textColor="@color/colorTextWhite"
+                        android:textSize="20sp" />
+
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="26dp"
+                        android:layout_marginEnd="-14dp"
+                        android:id="@+id/btnClean"
+                        android:background="@color/seeThro"
+                        android:layout_alignParentEnd="true"
+                        android:text="Išvalyti"
+                        android:textStyle="italic"
+                        android:textColor="@color/colorAccent" />
+
+                </RelativeLayout>
+
+                <EditText
+                    android:id="@+id/assignmentTo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="18sp" />
+
+                <RelativeLayout
+                    android:layout_width="300dp"
+                    android:layout_height="0dp"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_weight=".28"
+                    android:background="@drawable/spinnerbg"
+                    android:orientation="horizontal">
+
+
+                    <Spinner
+                        android:id="@+id/spin"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:scrollbarStyle="insideOverlay"
+                        android:scrollbars="vertical"
+                        android:verticalScrollbarPosition="left"
+                        android:spinnerMode="dropdown">
+
+                    </Spinner>
+
+                </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Užduotis: "
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="20sp" />
+
+                <EditText
+                    android:id="@+id/assignment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+
+            <RelativeLayout
+                android:id="@+id/rlNuoKada"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp">
+
+                <TextView
+                    android:id="@+id/tvKada"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:text="Kada priskirta: "
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/tvSince"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/tvKada"
+                    android:layout_centerVertical="true"
+                    android:ems="10"
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="18sp" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp">
+
+                <TextView
+                    android:id="@+id/tvIki"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:text="Numatytas iki: "
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="20sp" />
+
+                <EditText
+                    android:id="@+id/dptill"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@+id/tvIki"
+                    android:layout_toEndOf="@+id/tvIki"
+                    android:clickable="true"
+                    android:focusable="false"
+                    android:inputType="date"
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="18sp" />
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/llProgress"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="20dp"
+                    android:text="Progresas:"
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="20sp" />
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_margin="10dp"
+                    android:layout_gravity="center_horizontal|center_vertical">
+
+                    <Button
+                        android:id="@+id/btnDecrease"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/roundshape"
+                        android:text="-"
+                        android:textSize="28sp" />
+
+                    <ProgressBar
+                        android:id="@+id/progressBar"
+                        style="@android:style/Widget.ProgressBar.Horizontal"
+                        android:layout_width="160dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_toEndOf="@+id/btnDecrease"
+                        />
+
+                    <Button
+                        android:id="@+id/btnIncrease"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_toEndOf="@+id/progressBar"
+                        android:background="@drawable/roundshape"
+                        android:text="+"
+                        android:textSize="28sp" />
+
+                </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Komentarai:"
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/comment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp" />
+
+                <EditText
+                    android:id="@+id/admComment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="40dp"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/btnAdd"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:background="@drawable/roundshapebtn"
+                    android:text="Pridėti" />
+
+                <Button
+                    android:id="@+id/btnUpdate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:background="@drawable/roundshapebtn"
+                    android:text="Atnaujinti" />
+
+                <Button
+                    android:id="@+id/btnDelete"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:background="@drawable/roundshapebtn"
+                    android:text="Ištrinti" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
