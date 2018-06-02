@@ -18,14 +18,14 @@
             android:id="@+id/assignment_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="55dp">
+            android:layout_marginBottom="60dp">
 
         </android.support.v7.widget.RecyclerView>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-50dp"
+            android:layout_marginTop="-60dp"
             android:id="@+id/llForBtns"
             android:orientation="horizontal"
             android:layout_below="@+id/assignment_list"
@@ -35,7 +35,7 @@
                 android:id="@+id/btnPrideti"
                 android:layout_width="wrap_content"
                 android:minWidth="190dp"
-                android:layout_height="45dp"
+                android:layout_height="55dp"
                 android:text="Pridėti užduotį"
                 android:visibility="gone"/>
 
@@ -43,7 +43,7 @@
                 android:id="@+id/btnDaugiau"
                 android:layout_width="wrap_content"
                 android:minWidth="190dp"
-                android:layout_height="45dp"
+                android:layout_height="55dp"
                 android:text="Daugiau pasirinkimų"
                 android:visibility="gone"/>
 
@@ -51,7 +51,7 @@
                 android:id="@+id/btnPerziuretSenesnius"
                 android:layout_width="wrap_content"
                 android:minWidth="190dp"
-                android:layout_height="45dp"
+                android:layout_height="55dp"
                 android:text="Daugiau pasirinkimų"
                 android:visibility="gone"/>
 

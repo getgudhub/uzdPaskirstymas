@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -12,7 +13,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
+import android.text.InputType;
+import android.text.SpannableStringBuilder;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -24,6 +29,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Space;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,7 +45,7 @@ import java.util.Locale;
 
 public class AdminAssignmentActivity extends FragmentActivity {
 
-    Button btnAdd, btnUpdate, btnDelete, btnClean, btnIncrease, btnDecrease;
+    Button btnAdd, btnUpdate, btnDelete, btnClean, btnIncrease, btnDecrease, btnComment;
     DatabaseSQLiteAssignment dba;
     DatabaseSQLiteUser dbu;
 
@@ -50,7 +56,7 @@ public class AdminAssignmentActivity extends FragmentActivity {
     boolean pridejimas = false;
     RelativeLayout rlDate;
     LinearLayout llProgress;
-    TextView tvComment, tvAssignDate;
+    TextView tvAssignDate;
     EditText etAssignTo, etAssignment, etAdmComment, etGroup;
     @SuppressLint("StaticFieldLeak")
     static EditText etEndDate;
@@ -61,17 +67,24 @@ public class AdminAssignmentActivity extends FragmentActivity {
     ArrayList<String> users;
     ArrayList<String> assignedToList;
 
+    //just for comments
+    private LinearLayout commentsLayout;
+    Boolean commented = false;
+    String userFullName;
+    List<String> assignList;
+    List<String> commentsList;
+    List<String> admCommentList;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_assignment);
 
+        commentsLayout = findViewById(R.id.commentsLayout);
         progressBar =   findViewById(R.id.progressBar);
         etGroup =       findViewById(R.id.etGroup);
         etAssignTo =    findViewById(R.id.assignmentTo);
         etAssignment =  findViewById(R.id.assignment);
-        etAdmComment =  findViewById(R.id.admComment);
-        tvComment =     findViewById(R.id.comment);
         etEndDate =     findViewById(R.id.dptill);
         tvAssignDate =  findViewById(R.id.tvSince);
 
@@ -81,10 +94,13 @@ public class AdminAssignmentActivity extends FragmentActivity {
         btnClean =      findViewById(R.id.btnClean);
         btnIncrease =   findViewById(R.id.btnIncrease);
         btnDecrease =   findViewById(R.id.btnDecrease);
+        btnComment =    findViewById(R.id.btnComment);
 
         rlDate = findViewById(R.id.rlNuoKada);
         llProgress = findViewById(R.id.llProgress);
         spinner = findViewById(R.id.spin);
+
+        getAndSetUserFullName();
 
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
@@ -112,15 +128,20 @@ public class AdminAssignmentActivity extends FragmentActivity {
                 assignmentId = bundle.getInt("id");
                 progress = bundle.getInt("progress");
 
+                if(comment != null) {
+                    settingUpComments();
+                }
+                if(admComment != null){
+                    settingUpAdminComment();
+                }
+
                 progressBar.setProgress(progress);
                 etGroup.setText(assignmentGroup);
                 etAssignment.setText(assignmentName);
-                etAdmComment.setText(admComment);
-                tvComment.setText(comment);
                 etEndDate.setText(assignmentEndDate);
                 tvAssignDate.setText(assignmentAssignDate);
 
-                List<String> assignList = new ArrayList<String> (Arrays.asList(names.split(",")));
+                List<String> assignList = new ArrayList<String> (Arrays.asList(names.split(", ")));
                 String temporary ="";
                 for(int i=0; i<assignList.size(); i++) {
                     if(Validation.isValidFullName(assignList.get(i)))
@@ -147,9 +168,7 @@ public class AdminAssignmentActivity extends FragmentActivity {
                 }
             }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
+            public void onNothingSelected(AdapterView<?> parent) { }
         });
 
         btnClean.setOnClickListener(new View.OnClickListener() {
@@ -207,20 +226,16 @@ public class AdminAssignmentActivity extends FragmentActivity {
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    if(validAssignment()) {
-                        assignment = createAssignment();
-                        dba = new DatabaseSQLiteAssignment(AdminAssignmentActivity.this);
-                        dba.addAssignment(assignment);
-                        dba.close();
+                if(validAssignment()) {
+                    assignment = createAssignment();
+                    dba = new DatabaseSQLiteAssignment(AdminAssignmentActivity.this);
+                    dba.addAssignment(assignment);
+                    dba.close();
 
-                        Intent intentAdd = new Intent(AdminAssignmentActivity.this, TableActivity.class);
-                        intentAdd.putExtra("userlevel", userlevel);
-                        startActivity(intentAdd);
-                        AdminAssignmentActivity.this.finish();
-                    }
-                } catch (ParseException e) {
-                    Log.e("ParseExc", "Failed to parse date");
+                    Intent intentAdd = new Intent(AdminAssignmentActivity.this, TableActivity.class);
+                    intentAdd.putExtra("userlevel", userlevel);
+                    startActivity(intentAdd);
+                    AdminAssignmentActivity.this.finish();
                 }
             }
         });
@@ -258,7 +273,27 @@ public class AdminAssignmentActivity extends FragmentActivity {
                 AdminAssignmentActivity.this.finish();
             }
         });
+
+        btnComment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(commented){
+                    commented = null; // trinimui
+                    getAdminCommentForEditTextView();
+                    commented = false;
+                    btnComment.setTextColor(ContextCompat.getColor(AdminAssignmentActivity.this, R.color.colorGreen));
+                    btnComment.setText("Pridėti komentarą");
+                }else{
+                    getAdminCommentForEditTextView();
+                    commented = true;
+                    btnComment.setTextColor(ContextCompat.getColor(AdminAssignmentActivity.this, R.color.colorRed));
+                    btnComment.setText("IŠtrinti komentarą");
+                }
+            }
+        });
     }
+
+
 
     public static class DatePickerFragment extends DialogFragment implements
             DatePickerDialog.OnDateSetListener {
@@ -277,7 +312,7 @@ public class AdminAssignmentActivity extends FragmentActivity {
         }
 
         public void onDateSet(DatePicker view, int year, int month, int day) {
-            // Do something with the date chosen by the user
+            // Do something with the date chosen by the user:
                 etEndDate.setText(day + "/" + (month + 1) + "/" + year);
         }
     }
@@ -311,7 +346,9 @@ public class AdminAssignmentActivity extends FragmentActivity {
         assignment.setNames(names);
         assignment.setEndDate(etEndDate.getText().toString());
         assignment.setAssignDate(getDate());
-        assignment.setAdmComment(etAdmComment.getText().toString());
+        if(commented) {
+            assignment.setAdmComment(userFullName + "~@" + etAdmComment.getText().toString());
+        }
 
         return assignment;
     }
@@ -338,13 +375,18 @@ public class AdminAssignmentActivity extends FragmentActivity {
         assignment.setNames(names);
         assignment.setEndDate(etEndDate.getText().toString());
         assignment.setAssignDate(tvAssignDate.getText().toString());
-        assignment.setAdmComment(etAdmComment.getText().toString());
+        assignment.setComment((comment));
         assignment.setProgress(progressBar.getProgress());
+        if(commented) {
+            assignment.setAdmComment(userFullName + "~@" + etAdmComment.getText().toString());
+        }else{
+            assignment.setAdmComment(null);
+        }
 
         return assignment;
     }
 
-    public boolean validAssignment() throws ParseException {
+    public boolean validAssignment() {
         dbu = new DatabaseSQLiteUser(this);
         for(int i=0; i<assignedToList.size(); i++){
             if (!dbu.checkFullName(assignedToList.get(i))) {
@@ -352,7 +394,8 @@ public class AdminAssignmentActivity extends FragmentActivity {
                 etAssignTo.setError("Nerastas asmuo");
                 return false;
             }
-        }dbu.close();
+        }
+        dbu.close();
         if(etGroup.getText().toString().isEmpty() || !Validation.isValidGroup(etGroup.getText().toString())){
             etGroup.requestFocus();
             etGroup.setError("Klaida grupės laukelyje");
@@ -371,10 +414,12 @@ public class AdminAssignmentActivity extends FragmentActivity {
         }
 
     }
+
     public String getDate(){
         String date = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date());
         return date;
     }
+
     public static boolean compareDates()  {
         int checkIfTrue = 0;
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
@@ -399,6 +444,74 @@ public class AdminAssignmentActivity extends FragmentActivity {
         }else if(newProgress < 100){
             progressBar.setProgressTintList(ColorStateList.valueOf(Color.YELLOW));
         }
+    }
+        /*
+             Komentaru metodai
+        */
+    public void settingUpComments(){
+        commentsList = new ArrayList<String>(Arrays.asList(comment.split("~@")));
+        assignList = new ArrayList<String>(Arrays.asList(names.split(", ")));
+        //kiek vartotoju priskirtu prie uzduoties be admin sarase
+        for(int i=0; i<assignList.size(); i++) {
+            //sarasas, kuriame isrenkami vartotojai ir ju komentarai; list of comment owners and the comments
+            for(int j=0; j<commentsList.size(); j=j+2){
+                if( assignList.get(i).equals(commentsList.get(j)) ){
+                    getOthersCommentsForEditTextView(assignList.get(i), commentsList.get(j+1));
+                }
+            }
+        }
+    }
+
+    public void settingUpAdminComment(){
+        admCommentList = new ArrayList<String>(Arrays.asList(admComment.split("~@")));
+        //jei yra admin komentaras jo metodas issaukiamas ir pakeiciamas btnComment mygtukas
+        if(!admCommentList.isEmpty()){
+            commented = true;
+            getAdminCommentForEditTextView();
+            btnComment.setTextColor(ContextCompat.getColor(AdminAssignmentActivity.this, R.color.colorRed));
+            btnComment.setText("IŠtrinti komentarą");
+        }
+    }
+
+    protected void getAdminCommentForEditTextView() {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LinearLayout adminCommentLayout = findViewById(R.id.adminCommentLayout);
+        View v = inflater.inflate( R.layout.comment_layout, null);
+        adminCommentLayout.addView(v);
+
+        TextView tvAdminC = findViewById(R.id.tvcFullname);
+        etAdmComment = findViewById(R.id.adminComment);
+
+        if(commented == null) {              //istrinti
+            adminCommentLayout.removeAllViews();
+        }else if(commented) {               //prideti esama komentara
+            tvAdminC.setText(userFullName);
+            etAdmComment.setText(admCommentList.get(1));
+        }else{                              //prideti nauja komentara
+            tvAdminC.setText(userFullName);
+            etAdmComment.setText("");
+        }
+
+    }
+
+    protected void getOthersCommentsForEditTextView(String name, String comment) {
+        final TextView tvc = new TextView(this);
+        tvc.setText(name);
+        tvc.setGravity(View.TEXT_ALIGNMENT_CENTER);
+        tvc.setTextColor(ContextCompat.getColor(this, R.color.colorGrey));
+        commentsLayout.addView(tvc);
+
+        final TextView tvComment = new TextView(this);
+        tvComment.setText(comment);
+        tvComment.setTextSize(18);
+        commentsLayout.addView(tvComment);
+
+    }
+
+    private void getAndSetUserFullName(){
+        DatabaseSQLiteUser dbu = new DatabaseSQLiteUser(this);
+        userFullName = dbu.getFullName(username);
+        dbu.close();
     }
 
 }

@@ -167,6 +167,19 @@ public class DatabaseSQLiteUser extends SQLiteOpenHelper {
         }
     }
 
+    public String getFullName(String username){
+        SQLiteDatabase db = this.getWritableDatabase();
+        String Query = "Select "+ USER_FULLNAME + " from " + TABLE_USERS + " where "+ USER_NAME + " = '"+ username + "' ";
+        String fullName="0";
+        Cursor c = db.rawQuery(Query, null);
+        if (c != null && c.moveToFirst() ) {
+            fullName = c.getString(0);
+        }
+        c.close();
+        db.close();
+        return fullName;
+    }
+
     public ArrayList<String> getAllUsers() {
         ArrayList<String> users = new ArrayList<String>();
         String temp = "";

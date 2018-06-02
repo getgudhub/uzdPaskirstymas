@@ -35,6 +35,7 @@
             android:layout_height="wrap_content"
             android:textAlignment="center"
             android:hint="VardasPrisijungimui"
+            android:inputType="textNoSuggestions"
             android:maxLines="1" />
 
         <Space
@@ -56,7 +57,7 @@
             android:textAlignment="center"
             android:hint="*****"
             android:maxLines="1"
-            android:inputType="textPassword"/>
+            android:inputType="textPassword|textNoSuggestions"/>
 
         <Space
             android:layout_width="match_parent"
