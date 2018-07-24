@@ -14,8 +14,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
-import android.text.InputType;
-import android.text.SpannableStringBuilder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,12 +22,12 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.Space;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,6 +44,7 @@ import java.util.Locale;
 public class AdminAssignmentActivity extends FragmentActivity {
 
     Button btnAdd, btnUpdate, btnDelete, btnClean, btnIncrease, btnDecrease, btnComment;
+    CheckBox dateChecker;
     DatabaseSQLiteAssignment dba;
     DatabaseSQLiteUser dbu;
 
@@ -95,24 +94,25 @@ public class AdminAssignmentActivity extends FragmentActivity {
         btnIncrease =   findViewById(R.id.btnIncrease);
         btnDecrease =   findViewById(R.id.btnDecrease);
         btnComment =    findViewById(R.id.btnComment);
+        dateChecker = findViewById(R.id.dateChecker);
 
         rlDate = findViewById(R.id.rlNuoKada);
         llProgress = findViewById(R.id.llProgress);
         spinner = findViewById(R.id.spin);
-
-        getAndSetUserFullName();
 
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         if (bundle != null) {
             userlevel = bundle.getInt("userlevel");
             username = bundle.getString("username");
+            getAndSetUserFullName();
             pridejimas = bundle.getBoolean("pridejimas");
             if(pridejimas){
                 btnDelete.setVisibility(View.GONE);
                 btnUpdate.setVisibility(View.GONE);
                 rlDate.setVisibility(View.GONE);
                 llProgress.setVisibility(View.GONE);
+                dateChecker.setVisibility(View.GONE);
                 assignedToList = new ArrayList<String>();
             }else{
                 btnAdd.setVisibility(View.GONE);
@@ -131,7 +131,7 @@ public class AdminAssignmentActivity extends FragmentActivity {
                 if(comment != null) {
                     settingUpComments();
                 }
-                if(admComment != null){
+                if(!admComment.equals("null") && admComment != null){
                     settingUpAdminComment();
                 }
 
@@ -234,6 +234,7 @@ public class AdminAssignmentActivity extends FragmentActivity {
 
                     Intent intentAdd = new Intent(AdminAssignmentActivity.this, TableActivity.class);
                     intentAdd.putExtra("userlevel", userlevel);
+                    intentAdd.putExtra("username", username);
                     startActivity(intentAdd);
                     AdminAssignmentActivity.this.finish();
                 }
@@ -243,17 +244,18 @@ public class AdminAssignmentActivity extends FragmentActivity {
         btnUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                assignment = updatingAssignment();
-                dba = new DatabaseSQLiteAssignment(AdminAssignmentActivity.this);
+                if(validAssignment()) {
+                    assignment = updatingAssignment();
+                    dba = new DatabaseSQLiteAssignment(AdminAssignmentActivity.this);
+                    dba.updateAssignment(assignment);
+                    dba.close();
 
-                dba.updateAssignment(assignment);
-                dba.close();
-
-                Intent intentUp = new Intent(AdminAssignmentActivity.this, TableActivity.class);
-                intentUp.putExtra("userlevel", userlevel);
-                intentUp.putExtra("username", username);
-                startActivity(intentUp);
-                AdminAssignmentActivity.this.finish();
+                    Intent intentUp = new Intent(AdminAssignmentActivity.this, TableActivity.class);
+                    intentUp.putExtra("userlevel", userlevel);
+                    intentUp.putExtra("username", username);
+                    startActivity(intentUp);
+                    AdminAssignmentActivity.this.finish();
+                }
             }
         });
 
@@ -278,9 +280,10 @@ public class AdminAssignmentActivity extends FragmentActivity {
             @Override
             public void onClick(View v) {
                 if(commented){
-                    commented = null; // trinimui
+                    commented = null;   // trinimui
                     getAdminCommentForEditTextView();
-                    commented = false;
+                    commented = false;  // istrinta, todel logiskai false
+                    admComment = null;  // pravalymui
                     btnComment.setTextColor(ContextCompat.getColor(AdminAssignmentActivity.this, R.color.colorGreen));
                     btnComment.setText("Pridėti komentarą");
                 }else{
@@ -293,7 +296,9 @@ public class AdminAssignmentActivity extends FragmentActivity {
         });
     }
 
-
+    /*
+        Methods
+    */
 
     public static class DatePickerFragment extends DialogFragment implements
             DatePickerDialog.OnDateSetListener {
@@ -313,6 +318,9 @@ public class AdminAssignmentActivity extends FragmentActivity {
 
         public void onDateSet(DatePicker view, int year, int month, int day) {
             // Do something with the date chosen by the user:
+            if(month<10){
+                etEndDate.setText(day + "/0" + (month + 1) + "/" + year);
+            }else
                 etEndDate.setText(day + "/" + (month + 1) + "/" + year);
         }
     }
@@ -379,8 +387,6 @@ public class AdminAssignmentActivity extends FragmentActivity {
         assignment.setProgress(progressBar.getProgress());
         if(commented) {
             assignment.setAdmComment(userFullName + "~@" + etAdmComment.getText().toString());
-        }else{
-            assignment.setAdmComment(null);
         }
 
         return assignment;
@@ -405,9 +411,10 @@ public class AdminAssignmentActivity extends FragmentActivity {
             etAssignment.setError("Klaida užduoties pavadinimo laukelyje");
             return false;
         }else if(etEndDate.getText().toString().isEmpty() || !Validation.isValidDate(etEndDate.getText().toString()) ||
-                !compareDates() ){
+                (!compareDates() && !dateChecker.isChecked())){
             etEndDate.requestFocus();
-            etEndDate.setError("Klaida datoje. Iki kada numatyta turi būti bent diena toliau nei " + getDate());
+            etEndDate.setError("Klaida datoje");
+            Toast.makeText(this, "Pažymėkite langelį arba pakeiskite datą toliau šiandienos", Toast.LENGTH_LONG).show();
             return false;
         }else {
             return true;
@@ -451,7 +458,7 @@ public class AdminAssignmentActivity extends FragmentActivity {
     public void settingUpComments(){
         commentsList = new ArrayList<String>(Arrays.asList(comment.split("~@")));
         assignList = new ArrayList<String>(Arrays.asList(names.split(", ")));
-        //kiek vartotoju priskirtu prie uzduoties be admin sarase
+        //kiek vartotoju priskirtu prie uzduoties
         for(int i=0; i<assignList.size(); i++) {
             //sarasas, kuriame isrenkami vartotojai ir ju komentarai; list of comment owners and the comments
             for(int j=0; j<commentsList.size(); j=j+2){
@@ -464,13 +471,11 @@ public class AdminAssignmentActivity extends FragmentActivity {
 
     public void settingUpAdminComment(){
         admCommentList = new ArrayList<String>(Arrays.asList(admComment.split("~@")));
-        //jei yra admin komentaras jo metodas issaukiamas ir pakeiciamas btnComment mygtukas
-        if(!admCommentList.isEmpty()){
-            commented = true;
-            getAdminCommentForEditTextView();
-            btnComment.setTextColor(ContextCompat.getColor(AdminAssignmentActivity.this, R.color.colorRed));
-            btnComment.setText("IŠtrinti komentarą");
-        }
+        commented = true;
+        getAdminCommentForEditTextView();
+        btnComment.setTextColor(ContextCompat.getColor(AdminAssignmentActivity.this, R.color.colorRed));
+        btnComment.setText("IŠtrinti komentarą");
+
     }
 
     protected void getAdminCommentForEditTextView() {
@@ -491,7 +496,6 @@ public class AdminAssignmentActivity extends FragmentActivity {
             tvAdminC.setText(userFullName);
             etAdmComment.setText("");
         }
-
     }
 
     protected void getOthersCommentsForEditTextView(String name, String comment) {
@@ -505,8 +509,9 @@ public class AdminAssignmentActivity extends FragmentActivity {
         tvComment.setText(comment);
         tvComment.setTextSize(18);
         commentsLayout.addView(tvComment);
-
     }
+
+    //Admin full name priskirimas
 
     private void getAndSetUserFullName(){
         DatabaseSQLiteUser dbu = new DatabaseSQLiteUser(this);

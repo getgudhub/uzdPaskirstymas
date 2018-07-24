@@ -80,7 +80,11 @@ public class AssignmentActivity extends AppCompatActivity {
             if(comment!=null) {
                 settingUpComments();
             }
-
+            if(admComment!=null){
+                adminCommentList = new ArrayList<String> (Arrays.asList(admComment.split("~@")));
+                tvAdminName.setText(adminCommentList.get(0));
+                tvAdmComment.setText(adminCommentList.get(1));
+            }
 
             tvAssignment.setText(assignmentName);
             tvGroup.setText(assignmentGroup);
@@ -88,9 +92,7 @@ public class AssignmentActivity extends AppCompatActivity {
             tvDueDate.setText(assignmentEndDate);
             tvAssignDate.setText(assignmentAssignDate);
             progressBar.setProgress(progress);
-            adminCommentList = new ArrayList<String> (Arrays.asList(admComment.split("~@")));
-            tvAdminName.setText(adminCommentList.get(0));
-            tvAdmComment.setText(adminCommentList.get(1));
+
         }
 
         newProgress = progress;
@@ -162,7 +164,7 @@ public class AssignmentActivity extends AppCompatActivity {
                 }else{
                     commentText += commentsList.get(i) + "~@";
                     i++;
-                    commentText += commentsList.get(i) + "~@";  //isskirimui ~@
+                    commentText += commentsList.get(i) + "~@";  //isskirimui pasrinkti simboliai ~@
                 }
             }
         }
@@ -255,9 +257,9 @@ public class AssignmentActivity extends AppCompatActivity {
 
     public void settingUpComments(){
         int commentAt = 0;
-        commentsList = new ArrayList<String>(Arrays.asList(comment.split("~@")));
-        assignList = new ArrayList<String>(Arrays.asList(names.split(", ")));
-        ArrayList oldCommentsList = new ArrayList<String>(commentsList);
+        commentsList = new ArrayList<String>(Arrays.asList(comment.split("~@")));   //komentarai
+        assignList = new ArrayList<String>(Arrays.asList(names.split(", ")));      //priskirti zmones
+        ArrayList oldCommentsList = new ArrayList<String>(commentsList);                 //kopijuojamas Array, nes ankstesnis bus redaguojamas
         //kiek vartotoju priskirtu prie uzduoties; how many are assigned to the assignment
         for(int i=0; i<assignList.size(); i++) {
             //sarasas, kuriame isrenkami vartotojai ir ju komentarai; list of comment owners and the comments
@@ -283,6 +285,8 @@ public class AssignmentActivity extends AppCompatActivity {
             commentsList.remove(commentAt -1); //delete user from list
         }
     }
+
+    //randamas, priskiriamas dabartinio vartotojo vardas
 
     private void getAndSetUserFullName(){
         DatabaseSQLiteUser dbu = new DatabaseSQLiteUser(this);
